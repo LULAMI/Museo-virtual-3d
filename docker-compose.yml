@@ -1,0 +1,30 @@
+# ==========================================
+# docker-compose.yml
+# Levanta el Museo Virtual completo con Docker
+# Uso: docker-compose up --build
+# ==========================================
+
+version: '3.8'
+
+services:
+  museo-virtual:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: museo-virtual
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persistir la base de datos y uploads fuera del contenedor
+      - ./museo.db:/app/museo.db
+      - ./uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CORS_ORIGIN=*
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
